@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Weather App</title>
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style>
+        body {
+            font-size: 17px;
+            font-family: Arial;
+            background: #f4f4f4;
+            line-height: 1.5cm;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px #000 solid;
+            margin-bottom: 10px;
+        }
+
+        #container {
+            width: 90%;
+            margin: auto;
+            padding: 10px;
+        }
+
+        .display {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Temperature App</h1>
+    </header>
+
+    <div>
+        <center><h3 class="text-muted">Please enter your city name and unit preference: </h3></center>
+        <center>
+            <form class="form-group" id="form">
+                <input type="text" id="city" name="city" /><br />
+                <select id="unit" name="unit">
+                    <option value="fahrenheit">Fahrenheit</option>
+                    <option value="celsius">Celsius</option>
+                    <option value="kelvin">Kelvin</option>
+                </select>
+                <input type="submit" value="Submit" class="btn btn-info" />
+            </form>
+        </center>
+    </div>
+
+    <center>
+        <b><p class="display">Temperature: </p></b><p class="display" id="temp"></p><br />
+        <b><p class="display">Highest: </p></b><p class="display" id="maxTemp"></p><br />
+        <b><p class="display">Lowest: </p></b><p class="display" id="minTemp"></p><br />
+    </center>
+
+   
+
+    <script>
+        //change colors upon clicking form field
+        $('input').focus(function () {
+            //alert('focus');
+            $(this).css('background', 'pink');
+        });
+
+        $('input').blur(function () {
+            $(this).css('background', 'white');
+        });
+
+        //dealing with the actual form
+        $('#form').submit(function (e) {
+            e.preventDefault(); //because without this, it is still submitting
+            //grab the data values
+            var city = $('input#city').val(); //rememer: # indicates id
+            console.log("name: " + city);
+            var unitType = $('#unit option:selected').text();
+            console.log("unit: " + unitType);
+            console.log('Submitted');
+
+            //API call to open weather map
+            var apiKey = 'fa7d80c48643dfadde2cced1b1be6ca1';
+            var req = new XMLHttpRequest();
+            var payload = { cityName: null };
+            payload.cityName = city;
+            req.open('GET', 'http://api.openweathermap.org/data/2.5/weather?q='+city+'&appid=' + apiKey, false);
+            //req.open('GET', 'api.openweathermap.org/data/2.5/forecast/daily?zip=' + zip + ',us');
+            req.send();
+            var response = JSON.parse(req.responseText);
+
+            //make sure that fields are clear
+            $('#temp').empty(); //takes all inner elements out
+            $('#minTemp').empty();
+            $('#maxTemp').empty();
+
+            //append response to element
+
+                if (unitType == "Fahrenheit") {
+                    $('#temp').append(kToF(response.main.temp) + " degrees " + unitType);
+                    $('#minTemp').append(kToF(response.main.temp_min) + " degrees " +unitType);
+                    $('#maxTemp').append(kToF(response.main.temp_max) + " degrees " + unitType);
+                }
+                else if (unitType == "Kelvin") {
+                    $('#temp').append(response.main.temp +" degrees " +unitType);
+                    $('#minTemp').append(response.main.temp_min + " degrees " + unitType);
+                    $('#maxTemp').append(response.main.temp_max + " degrees " + unitType);
+                }
+                else if (unitType == "Celsius") {
+                    $('#temp').append(kToC(response.main.temp) + " degrees " + unitType);
+                    $('#minTemp').append(kToC(response.main.temp_min) + " degrees " + unitType);
+                    $('#maxTemp').append(kToC(response.main.temp_max) + " degrees " + unitType);
+                }
+            
+            event.preventDefault();
+        });
+
+        function kToF(n) //convert kelvin to fahrenheit
+        {
+            return Math.floor(9/5*(n - 273) + 32);
+        }
+
+        function kToC(n) //convert kelvin to celsius
+        {
+            return Math.floor(n - 273.15);
+        }
+
+    </script>
+</body>
+</html>
